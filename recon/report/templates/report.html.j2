@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ product_name }} audit report {{ run_id }}</title>
+<style>
+{{ tokens | safe }}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 22px;
+}
+.report-head {
+  background: var(--color-primary);
+  color: var(--color-surface);
+  padding: var(--space-8) var(--space-6);
+}
+.report-head .head-inner,
+main {
+  max-width: 960px;
+  margin: 0 auto;
+}
+.page-title {
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 700;
+  margin: 0 0 var(--space-2);
+}
+.head-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-surface);
+}
+.head-meta dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.head-meta div {
+  display: flex;
+  gap: var(--space-2);
+}
+main {
+  padding: var(--space-6);
+}
+section {
+  margin-top: var(--space-8);
+}
+h2 {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  margin: 0 0 var(--space-4);
+}
+h3 {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  margin: var(--space-6) 0 var(--space-3);
+}
+.label {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.card,
+.alert {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+.card {
+  padding: var(--space-4);
+}
+.alert {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+  padding: var(--space-3);
+}
+.badge {
+  display: inline-block;
+  border-radius: var(--radius-control);
+  padding: 4px 10px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+}
+.badge-matched {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+.badge-danger {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+.badge-warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+.badge-info {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+}
+.badge-ai {
+  background: var(--color-ai-bg);
+  color: var(--color-ai);
+}
+.badge-neutral {
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+}
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-4);
+}
+.kpi {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+}
+.kpi b {
+  display: block;
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+table + table {
+  margin-top: var(--space-6);
+}
+th,
+td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+thead th {
+  position: sticky;
+  top: 0;
+  background: var(--color-surface);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+tbody tr:hover {
+  background: var(--color-bg);
+}
+.empty {
+  color: var(--color-text-muted);
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-card);
+  text-align: center;
+}
+.findings {
+  display: grid;
+  gap: var(--space-4);
+}
+.finding {
+  break-inside: avoid;
+}
+.finding-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+.finding-head .mono {
+  margin-right: var(--space-2);
+}
+.rule-line {
+  margin-top: var(--space-3);
+  color: var(--color-text-muted);
+}
+.evidence {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+.evidence-col {
+  min-width: 0;
+}
+.record {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-2);
+  margin-top: var(--space-2);
+}
+.record:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: var(--space-1);
+}
+.record dl {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: var(--space-1) var(--space-2);
+  margin: 0;
+}
+.record dt {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 20px;
+}
+.record dd {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+.record dd.amount {
+  font-variant-numeric: tabular-nums;
+}
+.facts {
+  margin-top: var(--space-4);
+}
+.facts dl {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+}
+.facts dt {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 22px;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+.facts dd {
+  margin: 0;
+  font-size: 13px;
+  line-height: 22px;
+  overflow-wrap: anywhere;
+}
+.ai-box {
+  margin-top: var(--space-4);
+  border-radius: var(--radius-card);
+  border-left: 3px solid var(--color-ai);
+  background: var(--color-ai-bg);
+  padding: var(--space-4);
+  break-inside: avoid;
+}
+.ai-box.deterministic {
+  border-left-color: var(--color-border);
+  background: var(--color-bg);
+}
+.ai-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+.ai-head .label {
+  margin-right: var(--space-2);
+}
+.ai-box p {
+  margin: 0 0 var(--space-3);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chips li {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  padding: var(--space-1) var(--space-2);
+}
+.cited {
+  margin-top: var(--space-3);
+}
+.uncertainties {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-6);
+}
+.action {
+  margin-top: var(--space-3);
+}
+.action .label {
+  margin-right: var(--space-2);
+}
+@media (max-width: 720px) {
+  main,
+  .report-head {
+    padding: var(--space-4);
+  }
+  .evidence {
+    grid-template-columns: 1fr;
+  }
+  .facts dl {
+    grid-template-columns: 1fr;
+  }
+  .record dd {
+    overflow-wrap: anywhere;
+  }
+}
+@media print {
+  @page {
+    margin: 16mm;
+  }
+  body {
+    background: #fff;
+    font-size: 11px;
+  }
+  main,
+  .report-head .head-inner {
+    max-width: none;
+    padding: 0;
+  }
+  .report-head {
+    padding: 0 0 var(--space-4);
+    background: #fff;
+    color: var(--color-text);
+  }
+  .head-meta,
+  .head-meta dd {
+    color: var(--color-text);
+  }
+  .no-print,
+  .back-to-top {
+    display: none;
+  }
+  .card,
+  .finding,
+  .ai-box,
+  .record,
+  tr {
+    break-inside: avoid;
+  }
+  thead th {
+    position: static;
+  }
+  tbody tr:hover {
+    background: #fff;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+</style>
+</head>
+<body>
+<header class="report-head">
+  <div class="head-inner">
+    <h1 class="page-title">{{ product_name }} audit report</h1>
+    <dl class="head-meta">
+      <div><dt>Run</dt><dd>{{ run_id }}</dd></div>
+      <div><dt>Generated</dt><dd>{{ created_at }}</dd></div>
+      <div><dt>Tool version</dt><dd>{{ tool_version }}</dd></div>
+      <div><dt>Findings</dt><dd>{{ finding_count }}</dd></div>
+    </dl>
+  </div>
+</header>
+<main>
+<section aria-labelledby="method">
+  <h2 id="method">Method</h2>
+  <p class="alert">{{ method_statement }}</p>
+</section>
+
+<section aria-labelledby="summary">
+  <h2 id="summary">Summary</h2>
+  <div class="kpis">
+    {% for kpi in kpis %}
+    <div class="kpi"><b>{{ kpi.value }}</b><span class="label">{{ kpi.label }}</span></div>
+    {% endfor %}
+  </div>
+  <table>
+    <thead>
+      <tr><th scope="col">Type</th><th scope="col">Status</th><th scope="col" class="num">Count</th></tr>
+    </thead>
+    <tbody>
+      {% for row in type_counts %}
+      <tr>
+        <td class="mono">{{ row.type }}</td>
+        <td>{{ row.status }}</td>
+        <td class="num">{{ row.count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section aria-labelledby="inputs">
+  <h2 id="inputs">Inputs</h2>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Source</th>
+        <th scope="col">File</th>
+        <th scope="col">SHA-256</th>
+        <th scope="col" class="num">Valid rows</th>
+        <th scope="col" class="num">Invalid rows</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in inputs %}
+      <tr>
+        <td>{{ item.source }}</td>
+        <td>{{ item.file }}</td>
+        <td class="mono">{{ item.sha256 }}</td>
+        <td class="num">{{ item.valid_rows }}</td>
+        <td class="num">{{ item.invalid_rows }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="label">Validation issues: {{ validation_issues }}</p>
+  {% for item in inputs %}
+  <h3>{{ item.source }} column map</h3>
+  <table>
+    <thead>
+      <tr><th scope="col">Field</th><th scope="col">Column</th></tr>
+    </thead>
+    <tbody>
+      {% for row in item.column_map %}
+      <tr><td class="mono">{{ row.label }}</td><td>{{ row.value }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endfor %}
+</section>
+
+<section aria-labelledby="findings">
+  <h2 id="findings">Findings</h2>
+  {% if not groups %}
+  <p class="empty">No discrepancies.</p>
+  {% endif %}
+  {% for group in groups %}
+  <h3>{{ group.severity_label }} severity</h3>
+  {% for section in group.sections %}
+  <h3>{{ section.type_label }} ({{ section.cards | length }})</h3>
+  <div class="findings">
+    {% for card in section.cards %}
+    <article class="card finding">
+      <div class="finding-head">
+        <span class="mono">{{ card.id }}</span>
+        <span class="badge badge-{{ card.severity_class }}">{{ card.type_label }}</span>
+        <span class="badge badge-neutral">{{ card.severity_label }} severity</span>
+        <span class="badge badge-neutral">{{ card.status_label }}</span>
+      </div>
+      <p class="rule-line mono">{{ card.rule.id }} v{{ card.rule.version }} &mdash; {{ card.rule.description }}{% if card.score %} &middot; score {{ card.score }}{% endif %}</p>
+      <div class="evidence">
+        <div class="evidence-col">
+          <span class="label">Ledger</span>
+          {% if card.ledger %}
+          {% for record in card.ledger %}
+          <div class="record">
+            {% if record.unavailable %}
+            <p class="mono">{{ record.id }}</p>
+            {% else %}
+            <dl>
+              <dt>Record</dt><dd class="mono">{{ record.id }}</dd>
+              <dt>Row</dt><dd>{{ record.row_number }}</dd>
+              <dt>Date</dt><dd class="mono">{{ record.date }}</dd>
+              <dt>Amount</dt><dd class="amount">{{ record.amount }} {{ record.currency }}</dd>
+              <dt>Reference</dt><dd class="mono">{{ record.reference }}</dd>
+              <dt>Description</dt><dd>{{ record.description }}</dd>
+            </dl>
+            {% endif %}
+          </div>
+          {% endfor %}
+          {% else %}
+          <p class="record label">none</p>
+          {% endif %}
+        </div>
+        <div class="evidence-col">
+          <span class="label">Bank</span>
+          {% if card.bank %}
+          {% for record in card.bank %}
+          <div class="record">
+            {% if record.unavailable %}
+            <p class="mono">{{ record.id }}</p>
+            {% else %}
+            <dl>
+              <dt>Record</dt><dd class="mono">{{ record.id }}</dd>
+              <dt>Row</dt><dd>{{ record.row_number }}</dd>
+              <dt>Date</dt><dd class="mono">{{ record.date }}</dd>
+              <dt>Amount</dt><dd class="amount">{{ record.amount }} {{ record.currency }}</dd>
+              <dt>Reference</dt><dd class="mono">{{ record.reference }}</dd>
+              <dt>Description</dt><dd>{{ record.description }}</dd>
+            </dl>
+            {% endif %}
+          </div>
+          {% endfor %}
+          {% else %}
+          <p class="record label">none</p>
+          {% endif %}
+        </div>
+      </div>
+      {% if card.facts %}
+      <div class="facts">
+        <span class="label">Facts</span>
+        <dl>
+          {% for fact in card.facts %}
+          <dt>{{ fact.label }}</dt><dd>{{ fact.value }}</dd>
+          {% endfor %}
+        </dl>
+      </div>
+      {% endif %}
+      {% if card.explanation %}
+      <div class="ai-box{% if card.explanation.kind == 'deterministic' %} deterministic{% endif %}">
+        <div class="ai-head">
+          <span class="label">{{ card.explanation.label }}</span>
+          <span class="badge badge-{% if card.explanation.kind == 'ai' %}ai{% else %}neutral{% endif %}">{{ card.explanation.badge }}</span>
+          <span class="badge badge-neutral">confidence {{ card.explanation.confidence }}</span>
+        </div>
+        <p>{{ card.explanation.summary }}</p>
+        <p>{{ card.explanation.text }}</p>
+        <p><span class="label">Likely cause</span> {{ card.explanation.cause }}</p>
+        {% if card.explanation.cited %}
+        <div class="cited">
+          <span class="label">Cited facts</span>
+          <ul class="chips">
+            {% for fact in card.explanation.cited %}
+            <li class="mono">{{ fact.field }} = {{ fact.value }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+        {% if card.explanation.uncertainties %}
+        <span class="label">Uncertainties</span>
+        <ul class="uncertainties">
+          {% for item in card.explanation.uncertainties %}
+          <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      <p class="action">
+        <span class="label">Recommended action</span>
+        {{ card.explanation.action }} &mdash; {{ card.explanation.action_detail }}
+      </p>
+      {% else %}
+      <p class="action label">No explanation</p>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+  {% endfor %}
+  {% endfor %}
+</section>
+
+<section aria-labelledby="matches">
+  <h2 id="matches">Matched items ({{ matches | length }})</h2>
+  {% if matches %}
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Finding</th>
+        <th scope="col">Rule</th>
+        <th scope="col">Type</th>
+        <th scope="col">Ledger records</th>
+        <th scope="col">Bank records</th>
+        <th scope="col" class="num">Ledger total</th>
+        <th scope="col" class="num">Bank total</th>
+        <th scope="col" class="num">Score</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in matches %}
+      <tr>
+        <td class="mono">{{ row.id }}</td>
+        <td class="mono">{{ row.rule }}</td>
+        <td class="mono">{{ row.type }}</td>
+        <td class="mono">{{ row.ledger_ids | join(', ') }}</td>
+        <td class="mono">{{ row.bank_ids | join(', ') }}</td>
+        <td class="num">{% if row.ledger_total %}{{ row.ledger_total }}{% else %}&ndash;{% endif %}</td>
+        <td class="num">{% if row.bank_total %}{{ row.bank_total }}{% else %}&ndash;{% endif %}</td>
+        <td class="num">{% if row.score %}{{ row.score }}{% else %}&ndash;{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No matched items.</p>
+  {% endif %}
+</section>
+
+<section aria-labelledby="appendix">
+  <h2 id="appendix">Appendix</h2>
+  <h3>Investigation</h3>
+  <table>
+    <thead>
+      <tr><th scope="col">Setting</th><th scope="col">Value</th></tr>
+    </thead>
+    <tbody>
+      {% for row in llm %}
+      <tr><td class="mono">{{ row.label }}</td><td class="mono">{{ row.value }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <h3>Configuration</h3>
+  <table>
+    <thead>
+      <tr><th scope="col">Setting</th><th scope="col">Value</th></tr>
+    </thead>
+    <tbody>
+      {% for row in config %}
+      <tr><td class="mono">{{ row.label }}</td><td class="mono">{{ row.value }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="mono">config_hash = {{ config_hash }}</p>
+  <h3>Rule versions</h3>
+  <table>
+    <thead>
+      <tr><th scope="col">Rule</th><th scope="col">Version</th><th scope="col">Description</th></tr>
+    </thead>
+    <tbody>
+      {% for rule in rules %}
+      <tr>
+        <td class="mono">{{ rule.id }}</td>
+        <td class="mono">{{ rule.version }}</td>
+        <td>{{ rule.description }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+</main>
+</body>
+</html>

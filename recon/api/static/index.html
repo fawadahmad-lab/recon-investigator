@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recon Investigator</title>
+    <link rel="stylesheet" href="/static/tokens.css" />
+    <link rel="stylesheet" href="/static/app.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1 class="page-title">Recon Investigator</h1>
+      <p class="tagline">Deterministic matching. Verified AI explanations.</p>
+    </header>
+
+    <main class="page">
+      <section class="panel" aria-labelledby="inputs-heading">
+        <h2 class="section-heading" id="inputs-heading">Files</h2>
+
+        <div class="drop-grid">
+          <div class="dropzone" id="bank-zone">
+            <input
+              class="file-input"
+              type="file"
+              id="bank-file"
+              data-side="bank"
+              accept=".csv,.xlsx"
+              aria-label="Bank statement file"
+            />
+            <span class="drop-label">Bank statement</span>
+            <span class="drop-file" id="bank-file-text">No file selected</span>
+          </div>
+
+          <div class="dropzone" id="ledger-zone">
+            <input
+              class="file-input"
+              type="file"
+              id="ledger-file"
+              data-side="ledger"
+              accept=".csv,.xlsx"
+              aria-label="Ledger file"
+            />
+            <span class="drop-label">Ledger</span>
+            <span class="drop-file" id="ledger-file-text">No file selected</span>
+          </div>
+        </div>
+
+        <details class="mapping">
+          <summary class="section-heading">Column mapping</summary>
+          <div class="field-grid" id="mapping-fields"></div>
+        </details>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="run-button" type="button">Run reconciliation</button>
+          <button class="btn btn-secondary" id="demo-button" type="button">Load demo data</button>
+        </div>
+
+        <p class="alert alert-error" id="error-alert" role="alert" hidden></p>
+      </section>
+
+      <section class="panel" aria-labelledby="run-heading">
+        <h2 class="section-heading" id="run-heading">Run</h2>
+        <ol class="stepper" id="stepper">
+          <li class="step" data-stage="parse"><span class="step-name">Parse</span></li>
+          <li class="step" data-stage="normalize"><span class="step-name">Normalize</span></li>
+          <li class="step" data-stage="match"><span class="step-name">Match</span></li>
+          <li class="step" data-stage="investigate"><span class="step-name">Investigate</span></li>
+          <li class="step" data-stage="report"><span class="step-name">Report</span></li>
+        </ol>
+        <p class="run-meta" id="run-meta" role="status"></p>
+      </section>
+
+      <section class="panel" id="results" aria-labelledby="results-heading" hidden>
+        <h2 class="section-heading" id="results-heading">Results</h2>
+        <div class="kpi-grid" id="kpi-grid"></div>
+
+        <div class="filters" id="filters">
+          <label class="toggle" for="show-matched">
+            <input type="checkbox" id="show-matched" />
+            <span>Matched items</span>
+          </label>
+          <label class="filter" for="type-filter">
+            <span>Type</span>
+            <select id="type-filter"></select>
+          </label>
+          <label class="filter" for="severity-filter">
+            <span>Severity</span>
+            <select id="severity-filter"></select>
+          </label>
+          <p class="filter-count" id="row-count"></p>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table" id="findings-table">
+            <thead>
+              <tr>
+                <th scope="col">Finding</th>
+                <th scope="col">Type</th>
+                <th scope="col">Severity</th>
+                <th scope="col">Ledger</th>
+                <th scope="col">Bank</th>
+                <th scope="col">Explanation</th>
+              </tr>
+            </thead>
+            <tbody id="findings-body"></tbody>
+          </table>
+          <p class="empty" id="empty-state" hidden>No findings match the filters.</p>
+        </div>
+
+        <p class="report-link">
+          <a class="btn btn-secondary" id="report-link" href="#" target="_blank" rel="noopener">
+            Open audit report
+          </a>
+        </p>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

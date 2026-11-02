@@ -1,0 +1,25 @@
+# Secrets and environments
+.env
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.coverage
+
+# Caches and generated data
+.cache/
+data/synthetic/*
+!data/synthetic/.gitkeep
+reports/*
+!reports/.gitkeep
+!reports/final_eval.md
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
